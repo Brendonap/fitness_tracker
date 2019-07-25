@@ -1,15 +1,11 @@
 <template>
-  <div>
-    <top-nav />
-  </div>
+  <top-nav />
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import TopNav from "@/components/TopNav.vue";
-
 export default Vue.extend({
-  name: "home",
   components: {
     TopNav
   }
