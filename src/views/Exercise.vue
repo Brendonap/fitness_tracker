@@ -1,72 +1,110 @@
+<script lang="ts">
+import Vue from "vue";
+import Layout from "./Layouts/Main.vue";
+import BaseInput from "@/components/BaseInput.vue";
+import BaseSelect from "@/components/BaseSelect.vue";
+import BaseCard from "@/components/BaseCard.vue";
+import NewExercise from "@/components/NewExercise.vue";
+
+import db from "@/configs/firebase";
+
+interface SetInfo {
+  reps?: number;
+  weight?: number;
+}
+
+interface Exercise {
+  type: string;
+  setInfo: Array<SetInfo>;
+}
+
+export default Vue.extend({
+  components: {
+    Layout,
+    NewExercise
+  },
+  watch: {
+    exercises: {
+      handler() {
+        localStorage.setItem("exercises", JSON.stringify(this.exercises));
+      },
+      deep: true
+    }
+  },
+  created() {
+    this.exercises = this.getExercises();
+  },
+  methods: {
+    addExercise() {
+      this.exercises.unshift({
+        type: "",
+        setInfo: []
+      });
+    },
+    save(index: number) {
+      db.collection("exercises")
+        .add(this.exercises[index])
+        .then(docRef => console.info(docRef))
+        .catch(error => console.error(error));
+
+      this.remove(index);
+    },
+    remove(index: number): void {
+      this.exercises.splice(index, 1);
+    },
+    addSet(index: number): void {
+      const newSet = {
+        reps: 0,
+        weight: 0
+      };
+      if (this.exercises[index].setInfo.length > 0) {
+        const newSet = this.exercises[index].setInfo[
+          this.exercises[index].setInfo.length - 1
+        ];
+      }
+      this.exercises[index].setInfo.push(newSet);
+    },
+    removeSet(exerciseIndex: number, setIndex: any): void {
+      this.exercises[exerciseIndex].setInfo.splice(setIndex, 1);
+    },
+    getExercises() {
+      return localStorage.getItem("exercises") !== null
+        ? (JSON.parse(localStorage.getItem(
+            "exercises"
+          ) as string) as Exercise[])
+        : ([] as Exercise[]);
+    }
+  },
+  data() {
+    return {
+      exercises: [] as Exercise[],
+      showModal: false
+    };
+  }
+});
+</script>
+
 <template>
-  <div>
-    <top-nav />
-    <div class="mt-1">
-      <ul
-        v-for="(exercise, index) in exercises"
-        :key="index"
-        class="flex text-center border-b-2 border-yellow-500 px-5 pt-5 pb-5 w-full"
-      >
-        <li class="mr-6">
-          <router-link
-            :to="{ name: 'workout', params: { exercise: exercise } }"
-            >{{ exercise }}</router-link
-          >
-        </li>
-      </ul>
+  <layout>
+    <div>
+      <div v-for="(exercise, index) in exercises" :key="index">
+        <NewExercise
+          :exerciseData="exercise"
+          @addSet="addSet(index)"
+          @removeSet="setIndex => removeSet(index, setIndex)"
+          @save="save(index)"
+          @delete="remove(index)"
+        />
+      </div>
       <div class="m-4 static">
         <button
           id="show-modal"
-          @click="showModal = true"
-          class="bg-gray-700 hover:bg-yellow-500 absolute py-2 px-5 mr-4 text-3xl right-0 text-white font-bold rounded-full"
+          @click="addExercise"
+          class="bg-green-500 hover:bg-yellow-500 absolute py-2 px-5 mr-4 text-3xl right-0 text-white font-bold rounded-full"
         >
           +
         </button>
       </div>
-      <modal
-        v-if="showModal"
-        @submit="addNewExercise"
-        @close="showModal = false"
-      >
-        <template v-slot:header
-          >Add New Exercise</template
-        >
-        <template v-slot:input>
-          <base-input label="exercise name" v-model="newExericse"></base-input>
-        </template>
-      </modal>
     </div>
-  </div>
+  </layout>
 </template>
-
-<script lang="ts">
-import Vue from "vue";
-import TopNav from "@/components/TopNav.vue";
-import BaseInput from "@/components/BaseInput.vue";
-
-import Modal from "@/components/Modal.vue";
-
-export default Vue.extend({
-  components: {
-    TopNav,
-    BaseInput,
-    Modal
-  },
-  data() {
-    return {
-      exercises: ["bench", "squat"],
-      showModal: false,
-      newExericse: ""
-    };
-  },
-  methods: {
-    addNewExercise: function() {
-      if (this.newExericse) {
-        this.exercises.push(this.newExericse);
-        this.newExericse = "";
-      }
-      this.showModal = false;
-    }
-  }
-});
-</script>

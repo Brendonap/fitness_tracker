@@ -1,6 +1,6 @@
 <template>
   <button
-    class="bg-gray-700 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+    class="bg-gray-500 text-white font-bold py-1 px-1 rounded focus:outline-none"
     type="button"
     @click="$emit('click')"
   >

@@ -1,17 +1,15 @@
 <template>
-  <div>
-    <top-nav />
-  </div>
+  <layout>summary statistics</layout>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import TopNav from "@/components/TopNav.vue";
+import Layout from "./Layouts/Main.vue";
 
 export default Vue.extend({
   name: "home",
   components: {
-    TopNav
+    Layout
   }
 });
 </script>
